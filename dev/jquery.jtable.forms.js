@@ -1,4 +1,4 @@
-﻿/************************************************************************
+/************************************************************************
 * FORMS extension for jTable (base for edit/create forms)               *
 *************************************************************************/
 (function ($) {
@@ -456,25 +456,41 @@
 
         /* Sets enabled/disabled state of a dialog button.
         *************************************************************************/
-        _setEnabledOfDialogButton: function ($button, enabled, buttonText) {
+        _setEnabledOfDialogButton: function ($bootstrap, $button, enabled, buttonText) {
             if (!$button) {
                 return;
             }
 
-            if (enabled != false) {
-                $button
-                    .removeAttr('disabled')
-                    .removeClass('ui-state-disabled');
+            if ($bootstrap) {
+	            if (enabled != false) {
+	                $button
+	                    .removeAttr('disabled')
+	                    .removeClass('disabled');
+	            } else {
+	                $button
+	                    .attr('disabled', 'disabled')
+	                    .addClass('disabled');
+	            }
+	
+	            if (buttonText) {
+	                $button.html(buttonText);
+	            }           	
             } else {
-                $button
-                    .attr('disabled', 'disabled')
-                    .addClass('ui-state-disabled');
-            }
-
-            if (buttonText) {
-                $button
-                    .find('span')
-                    .text(buttonText);
+	            if (enabled != false) {
+	                $button
+	                    .removeAttr('disabled')
+	                    .removeClass('ui-state-disabled');
+	            } else {
+	                $button
+	                    .attr('disabled', 'disabled')
+	                    .addClass('ui-state-disabled');
+	            }
+	
+	            if (buttonText) {
+	                $button
+	                    .find('span')
+	                    .text(buttonText);
+	            }
             }
         }
 
