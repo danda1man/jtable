@@ -1,4 +1,4 @@
-﻿/************************************************************************
+/************************************************************************
 * CREATE RECORD extension for jTable                                    *
 *************************************************************************/
 (function ($) {
@@ -55,37 +55,34 @@
             //Create a div for dialog and add to container element
             self._$addRecordDiv = $('<div />')
                 .appendTo(self._$mainContainer);
-
-            //Prepare dialog
-            self._$addRecordDiv.dialog({
-                autoOpen: false,
-                show: self.options.dialogShowEffect,
-                hide: self.options.dialogHideEffect,
-                width: 'auto',
-                minWidth: '300',
-                modal: true,
-                title: self.options.messages.addNewRecord,
-                buttons:
-                        [{ //Cancel button
-                            text: self.options.messages.cancel,
-                            click: function () {
-                                self._$addRecordDiv.dialog('close');
-                            }
-                        }, { //Save button
-                            id: 'AddRecordDialogSaveButton',
-                            text: self.options.messages.save,
-                            click: function () {
-                                self._onSaveClickedOnCreateForm();
-                            }
-                        }],
-                close: function () {
-                    var $addRecordForm = self._$addRecordDiv.find('form').first();
-                    var $saveButton = $('#AddRecordDialogSaveButton');
-                    self._trigger("formClosed", null, { form: $addRecordForm, formType: 'create' });
-                    self._setEnabledOfDialogButton($saveButton, true, self.options.messages.save);
-                    $addRecordForm.remove();
-                }
+            
+            self._$addRecordDiv.addClass("modal fade");
+            self._$addRecordDiv.css({
+            	width: 'auto'
             });
+            self._$addRecordDiv.append('<div class="modal-dialog"><div class="modal-content"><div class="modal-header">' +
+            			'<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' +
+            			'<h3>' + self.options.messages.addNewRecord + '</h3></div>' +
+            			'<div class="modal-body" style="min-width: 300px;"></div>' +
+            			'<div class="modal-footer">' +
+            			'<a href="#" class="btn" data-dismiss="modal" aria-hidden="true">' + self.options.messages.cancel + '</a>' +
+            			'<a id="AddRecordDialogSaveButton" href="#" class="save btn btn-primary">' + self.options.messages.save + '</a></div>' +
+            	        '</div></div>');
+            self._$addRecordDiv.find(".save").click(function(event) {
+            	self._onSaveClickedOnCreateForm();
+            });
+            	
+            self._$addRecordDiv.modal({
+            	show: false
+            });
+            	
+            self._$addRecordDiv.on("hide.bs.modal", function (event) {
+                var $addRecordForm = self._$addRecordDiv.find('form').first();
+                var $saveButton = $('#AddRecordDialogSaveButton');
+                self._trigger("formClosed", null, { form: $addRecordForm, formType: 'create' });
+                self._setEnabledOfDialogButton(true, $saveButton, true, self.options.messages.save);
+                $addRecordForm.remove();            		
+            });            	
 
             if (self.options.addRecordButton) {
                 //If user supplied a button, bind the click event to show dialog form
@@ -113,7 +110,7 @@
             var $addRecordForm = self._$addRecordDiv.find('form');
 
             if (self._trigger("formSubmitting", null, { form: $addRecordForm, formType: 'create' }) != false) {
-                self._setEnabledOfDialogButton($saveButton, false, self.options.messages.saving);
+                self._setEnabledOfDialogButton(true, $saveButton, false, self.options.messages.saving);
                 self._saveAddRecordForm($addRecordForm, $saveButton);
             }
         },
@@ -246,7 +243,9 @@
             });
 
             //Open the form
-            self._$addRecordDiv.append($addRecordForm).dialog('open');
+            self._$addRecordDiv.find(".modal-body").append($addRecordForm);
+            self._$addRecordDiv.modal('show');
+            
             self._trigger("formCreated", null, { form: $addRecordForm, formType: 'create' });
         },
 
@@ -265,13 +264,13 @@
                     
                     if (data.Result != 'OK') {
                         self._showError(data.Message);
-                        self._setEnabledOfDialogButton($saveButton, true, self.options.messages.save);
+                        self._setEnabledOfDialogButton(true, $saveButton, true, self.options.messages.save);
                         return;
                     }
                     
                     if (!data.Record) {
                         self._logError('Server must return the created Record object.');
-                        self._setEnabledOfDialogButton($saveButton, true, self.options.messages.save);
+                        self._setEnabledOfDialogButton(true, $saveButton, true, self.options.messages.save);
                         return;
                     }
 
@@ -280,11 +279,11 @@
                         self._createRowFromRecord(data.Record), {
                             isNewRow: true
                         });
-                    self._$addRecordDiv.dialog("close");
+                    self._$addRecordDiv.modal("hide");
                 },
                 function () {
                     self._showError(self.options.messages.serverCommunicationError);
-                    self._setEnabledOfDialogButton($saveButton, true, self.options.messages.save);
+                    self._setEnabledOfDialogButton(true, $saveButton, true, self.options.messages.save);
                 });
         },
 
