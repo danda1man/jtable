@@ -1,4 +1,4 @@
-﻿/************************************************************************
+/************************************************************************
 * DELETION extension for jTable                                         *
 *************************************************************************/
 (function ($) {
@@ -63,51 +63,44 @@
             }
 
             //Create div element for delete confirmation dialog
-            self._$deleteRecordDiv = $('<div><p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span><span class="jtable-delete-confirm-message"></span></p></div>').appendTo(self._$mainContainer);
-
-            //Prepare dialog
-            self._$deleteRecordDiv.dialog({
-                autoOpen: false,
-                show: self.options.dialogShowEffect,
-                hide: self.options.dialogHideEffect,
-                modal: true,
-                title: self.options.messages.areYouSure,
-                buttons:
-                        [{  //cancel button
-                            text: self.options.messages.cancel,
-                            click: function () {
-                                self._$deleteRecordDiv.dialog("close");
-                            }
-                        }, {//delete button
-                            id: 'DeleteDialogButton',
-                            text: self.options.messages.deleteText,
-                            click: function () {
-                                
-                                //row maybe removed by another source, if so, do nothing
-                                if (self._$deletingRow.hasClass('jtable-row-removed')) {
-                                    self._$deleteRecordDiv.dialog('close');
-                                    return;
-                                }
-
-                                var $deleteButton = $('#DeleteDialogButton');
-                                self._setEnabledOfDialogButton($deleteButton, false, self.options.messages.deleting);
-                                self._deleteRecordFromServer(
-                                    self._$deletingRow,
-                                    function () {
-                                        self._removeRowsFromTableWithAnimation(self._$deletingRow);
-                                        self._$deleteRecordDiv.dialog('close');
-                                    },
-                                    function (message) { //error
-                                        self._showError(message);
-                                        self._setEnabledOfDialogButton($deleteButton, true, self.options.messages.deleteText);
-                                    }
-                                );
-                            }
-                        }],
-                close: function () {
-                    var $deleteButton = $('#DeleteDialogButton');
-                    self._setEnabledOfDialogButton($deleteButton, true, self.options.messages.deleteText);
+            self._$deleteRecordDiv = $('<div />').appendTo(self._$mainContainer);
+            
+            self._$deleteRecordDiv.addClass("modal fade");
+            self._$deleteRecordDiv.append('<div class="modal-dialog"><div class="modal-content"><div class="modal-header">' +
+        								    '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' +
+        								    '<h3>' + self.options.messages.areYouSure + '</h3></div>' +
+        								    '<div class="modal-body" style="min-width: 300px; min-heigth: 300px;"></div>' +
+        								    '<div class="modal-footer">' +
+        								    '<a href="#" class="btn" data-dismiss="modal" aria-hidden="true">' + self.options.messages.cancel + '</a>' +
+        								    '<a id="DeleteDialogButton" href="#" class="save btn btn-primary">' + self.options.messages.deleteText + '</a></div></div></div>');
+            	
+            self._$deleteRecordDiv.modal({show: false});
+            self._$deleteRecordDiv.find("#DeleteDialogButton").click(function(event) {
+                    
+                //row maybe removed by another source, if so, do nothing
+                if (self._$deletingRow.hasClass('jtable-row-removed')) {
+                    self._$deleteRecordDiv.dialog('close');
+                    return;
                 }
+
+                var $deleteButton = $(this);
+                self._setEnabledOfDialogButton(true, $deleteButton, false, self.options.messages.deleting);
+                self._deleteRecordFromServer(
+                    self._$deletingRow,
+                    function () {
+                        self._removeRowsFromTableWithAnimation(self._$deletingRow);
+                        self._$deleteRecordDiv.modal("hide");
+                    },
+                    function (message) { //error
+                        self._showError(message);
+                        self._setEnabledOfDialogButton(true, $deleteButton, true, self.options.messages.deleteText);
+                    }
+                );
+           		
+            });
+            self._$deleteRecordDiv.on("hidden", function(event) {
+                var $deleteButton = $(this).find('#DeleteDialogButton');
+                self._setEnabledOfDialogButton(true, $deleteButton, true, self.options.messages.deleteText);            		
             });
         },
 
@@ -307,8 +300,9 @@
 
             if (deleteConfirm != false) {
                 //Confirmation
-                self._$deleteRecordDiv.find('.jtable-delete-confirm-message').html(deleteConfirmMessage);
-                self._showDeleteDialog($row);
+            	self._$deleteRecordDiv.find(".modal-body").html(deleteConfirmMessage);
+
+	            self._showDeleteDialog($row);
             } else {
                 //No confirmation
                 self._deleteRecordFromServer(
@@ -326,8 +320,8 @@
         /* Shows delete comfirmation dialog.
         *************************************************************************/
         _showDeleteDialog: function ($row) {
-            this._$deletingRow = $row;
-            this._$deleteRecordDiv.dialog('open');
+	        this._$deletingRow = $row;
+        	this._$deleteRecordDiv.modal("show");
         },
 
         /* Performs an ajax call to server to delete record
@@ -385,10 +379,7 @@
             }
 
             if (animationsEnabled) {
-                var className = 'jtable-row-deleting';
-                if (this.options.jqueryuiTheme) {
-                    className = className + ' ui-state-disabled';
-                }
+                var className = 'jtable-row-deleting danger';
                 
                 //Stop current animation (if does exists) and begin 'deleting' animation.
                 $rows.stop(true, true).addClass(className, 'slow', '').promise().done(function () {
