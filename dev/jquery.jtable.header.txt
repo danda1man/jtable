@@ -1,4 +1,4 @@
-﻿/* 
+/* 
 
 jTable 2.3.1
 http://www.jtable.org
@@ -6,6 +6,13 @@ http://www.jtable.org
 ---------------------------------------------------------------------------
 
 Copyright (C) 2011-2013 by Halil İbrahim Kalkan (http://www.halilibrahimkalkan.com)
+
+---------------------------------------------------------------------------
+
+Copyright (C) 2014 by Dan Johnson
+Updated to use Bootstrap 3.0.3 instead of jQuery UI
+
+---------------------------------------------------------------------------
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -25,4 +32,4 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
-*/
+*/ 
