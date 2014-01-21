@@ -1,4 +1,4 @@
-﻿/************************************************************************
+/************************************************************************
 * EDIT RECORD extension for jTable                                      *
 *************************************************************************/
 (function ($) {
@@ -59,36 +59,32 @@
             //Create a div for dialog and add to container element
             self._$editDiv = $('<div></div>')
                 .appendTo(self._$mainContainer);
-
-            //Prepare dialog
-            self._$editDiv.dialog({
-                autoOpen: false,
-                show: self.options.dialogShowEffect,
-                hide: self.options.dialogHideEffect,
-                width: 'auto',
-                minWidth: '300',
-                modal: true,
-                title: self.options.messages.editRecord,
-                buttons:
-                        [{  //cancel button
-                            text: self.options.messages.cancel,
-                            click: function () {
-                                self._$editDiv.dialog('close');
-                            }
-                        }, { //save button
-                            id: 'EditDialogSaveButton',
-                            text: self.options.messages.save,
-                            click: function () {
-                                self._onSaveClickedOnEditForm();
-                            }
-                        }],
-                close: function () {
-                    var $editForm = self._$editDiv.find('form:first');
-                    var $saveButton = $('#EditDialogSaveButton');
-                    self._trigger("formClosed", null, { form: $editForm, formType: 'edit', row: self._$editingRow });
-                    self._setEnabledOfDialogButton($saveButton, true, self.options.messages.save);
-                    $editForm.remove();
-                }
+            
+            self._$editDiv.addClass("modal fade");
+            self._$editDiv.css({
+            	width: 'auto'
+            });
+            self._$editDiv.append('<div class="modal-dialog"><div class="modal-content"><div class="modal-header">' +
+            			'<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' +
+            			'<h3>' + self.options.messages.editRecord + '</h3></div>' +
+            			'<div class="modal-body" style="min-width: 300px;"></div>' +
+            			'<div class="modal-footer">' +
+            			'<a href="#" class="btn" data-dismiss="modal" aria-hidden="true">' + self.options.messages.cancel + '</a>' +
+            			'<a id="EditDialogSaveButton" href="#" class="save btn btn-primary">' + self.options.messages.save + '</a></div></div></div>');
+            self._$editDiv.find(".save").click(function(event) {
+            	self._onSaveClickedOnEditForm();
+            });
+            	
+            self._$editDiv.modal({
+            	show: false
+            });
+            	
+            self._$editDiv.on("hide.bs.modal", function (event) {
+                var $editForm = self._$editDiv.find('form:first');
+                var $saveButton = $('#EditDialogSaveButton');
+                self._trigger("formClosed", null, { form: $editForm, formType: 'edit', row: self._$editingRow });
+                self._setEnabledOfDialogButton(true, $saveButton, true, self.options.messages.save);
+                $editForm.remove();
             });
         },
 
@@ -99,14 +95,14 @@
             
             //row maybe removed by another source, if so, do nothing
             if (self._$editingRow.hasClass('jtable-row-removed')) {
-                self._$editDiv.dialog('close');
+            	self._$editDiv.modal("hide");            	
                 return;
             }
 
             var $saveButton = $('#EditDialogSaveButton');
             var $editForm = self._$editDiv.find('form');
             if (self._trigger("formSubmitting", null, { form: $editForm, formType: 'edit', row: self._$editingRow }) != false) {
-                self._setEnabledOfDialogButton($saveButton, false, self.options.messages.saving);
+                self._setEnabledOfDialogButton(true, $saveButton, false, self.options.messages.saving);
                 self._saveEditForm($editForm, $saveButton);
             }
         },
@@ -287,8 +283,10 @@
             });
 
             //Open dialog
-            self._$editingRow = $tableRow;
-            self._$editDiv.append($editForm).dialog('open');
+            self._$editingRow = $tableRow;            
+            self._$editDiv.find(".modal-body").html($editForm);
+            self._$editDiv.modal("show");
+            
             self._trigger("formCreated", null, { form: $editForm, formType: 'edit', record: record, row: $tableRow });
         },
 
@@ -303,7 +301,7 @@
                     //Check for errors
                     if (data.Result != 'OK') {
                         self._showError(data.Message);
-                        self._setEnabledOfDialogButton($saveButton, true, self.options.messages.save);
+                        self._setEnabledOfDialogButton(true, $saveButton, true, self.options.messages.save);
                         return;
                     }
 
@@ -321,11 +319,11 @@
                         self._showUpdateAnimationForRow(self._$editingRow);
                     }
 
-                    self._$editDiv.dialog("close");
+                    self._$editDiv.modal("hide");
                 },
                 function () {
                     self._showError(self.options.messages.serverCommunicationError);
-                    self._setEnabledOfDialogButton($saveButton, true, self.options.messages.save);
+                    self._setEnabledOfDialogButton(true, $saveButton, true, self.options.messages.save);
                 });
         },
 
@@ -370,10 +368,7 @@
         *************************************************************************/
         _showUpdateAnimationForRow: function ($tableRow) {
             var className = 'jtable-row-updated';
-            if (this.options.jqueryuiTheme) {
-                className = className + ' ui-state-highlight';
-            }
-            
+
             $tableRow.stop(true, true).addClass(className, 'slow', '', function () {
                 $tableRow.removeClass(className, 5000);
             });
