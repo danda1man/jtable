@@ -1,4 +1,4 @@
-﻿/************************************************************************
+/************************************************************************
 * MASTER/CHILD tables extension for jTable                              *
 *************************************************************************/
 (function ($) {
@@ -26,12 +26,7 @@
         *************************************************************************/
         openChildTable: function ($row, tableOptions, opened) {
             var self = this;
-
-            //Apply theming as same as parent table unless explicitily set
-            if (tableOptions.jqueryuiTheme == undefined) {
-                tableOptions.jqueryuiTheme = self.options.jqueryuiTheme;
-            }
-
+           
             //Show close button as default
             tableOptions.showCloseButton = (tableOptions.showCloseButton != false);
 
