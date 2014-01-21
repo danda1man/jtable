@@ -1,4 +1,4 @@
-﻿/************************************************************************
+/************************************************************************
 * CORE jTable module                                                    *
 *************************************************************************/
 (function ($) {
@@ -29,7 +29,11 @@
             showCloseButton: false,
             loadingAnimationDelay: 500,
             saveUserPreferences: true,
-            jqueryuiTheme: false,
+
+            /**
+            NOTE
+            look for instances of _jqueryuiThemeAddClass for missing styles
+            **/
 
             ajaxSettings: {
                 type: 'POST',
@@ -187,7 +191,7 @@
                 .addClass('jtable-main-container')
                 .appendTo(this.element);
 
-            this._jqueryuiThemeAddClass(this._$mainContainer, 'ui-widget');
+            //this._jqueryuiThemeAddClass(this._$mainContainer, 'ui-widget');
         },
 
         /* Creates title of the table if a title supplied in options.
@@ -203,7 +207,7 @@
                 .addClass('jtable-title')
                 .appendTo(self._$mainContainer);
 
-            self._jqueryuiThemeAddClass($titleDiv, 'ui-widget-header');
+            //self._jqueryuiThemeAddClass($titleDiv, 'ui-widget-header');
 
             $('<div />')
                 .addClass('jtable-title-text')
@@ -241,7 +245,7 @@
                 this._$table.attr('id', this.options.tableId);
             }
 
-            this._jqueryuiThemeAddClass(this._$table, 'ui-widget-content');
+            //this._jqueryuiThemeAddClass(this._$table, 'ui-widget-content');
 
             this._createTableHead();
             this._createTableBody();
@@ -296,7 +300,7 @@
                 .data('fieldName', fieldName)
                 .append($headerContainerDiv);
 
-            this._jqueryuiThemeAddClass($th, 'ui-state-default');
+            //this._jqueryuiThemeAddClass($th, 'ui-state-default');
 
             return $th;
         },
@@ -308,7 +312,7 @@
                 .addClass('jtable-command-column-header')
                 .css('width', '1%');
 
-            this._jqueryuiThemeAddClass($th, 'ui-state-default');
+            //this._jqueryuiThemeAddClass($th, 'ui-state-default');
 
             return $th;
         },
@@ -324,7 +328,7 @@
         _createBusyPanel: function () {
             this._$busyMessageDiv = $('<div />').addClass('jtable-busy-message').prependTo(this._$mainContainer);
             this._$busyDiv = $('<div />').addClass('jtable-busy-panel-background').prependTo(this._$mainContainer);
-            this._jqueryuiThemeAddClass(this._$busyMessageDiv, 'ui-widget-header');
+            //this._jqueryuiThemeAddClass(this._$busyMessageDiv, 'ui-widget-header');
             this._hideBusy();
         },
 
@@ -333,20 +337,18 @@
         _createErrorDialogDiv: function () {
             var self = this;
 
-            self._$errorDialogDiv = $('<div></div>').appendTo(self._$mainContainer);
-            self._$errorDialogDiv.dialog({
-                autoOpen: false,
-                show: self.options.dialogShowEffect,
-                hide: self.options.dialogHideEffect,
-                modal: true,
-                title: self.options.messages.error,
-                buttons: [{
-                    text: self.options.messages.close,
-                    click: function () {
-                        self._$errorDialogDiv.dialog('close');
-                    }
-                }]
-            });
+            self._$errorDialogDiv = $('<div class="modal fade" style="z-index: 999999;">' +
+            		    				'<div class="modal-dialog"><div class="modal-content"><div class="modal-header">' +
+            		    				'<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' +
+            		    				'<h3>' + self.options.messages.error + '</h3>' +
+            		    				'</div>' +
+            		    				'<div class="modal-body alert"></div>' +
+            		    				'<div class="modal-footer">' +
+            		    				'<a href="#" class="btn" data-dismiss="modal" aria-hidden="true">' + self.options.messages.close + '</a></div>' +
+            		    				'</div></div></div>').appendTo(self._$mainContainer);
+            self._$errorDialogDiv.modal({
+            	show: false
+            });            
         },
 
         /************************************************************************
@@ -557,9 +559,6 @@
         *************************************************************************/
         _showNewRowAnimation: function ($tableRow) {
             var className = 'jtable-row-created';
-            if (this.options.jqueryuiTheme) {
-                className = className + ' ui-state-highlight';
-            }
 
             $tableRow.addClass(className, 'slow', '', function () {
                 $tableRow.removeClass(className, 5000);
@@ -909,7 +908,7 @@
                 return new Date(
                     parseInt(dateString.substr(0, 4), 10),
                     parseInt(dateString.substr(5, 2), 10) - 1,
-                    parseInt(dateString.substr(8, 2, 10)),
+                    parseInt(dateString.substr(8, 2), 10),
                     parseInt(dateString.substr(11, 2), 10),
                     parseInt(dateString.substr(14, 2), 10),
                     parseInt(dateString.substr(17, 2), 10)
@@ -949,7 +948,7 @@
                 .addClass('jtable-toolbar-item')
                 .appendTo(this._$toolbarDiv);
 
-            this._jqueryuiThemeAddClass($toolBarItem, 'ui-widget ui-state-default ui-corner-all', 'ui-state-hover');
+            //this._jqueryuiThemeAddClass($toolBarItem, 'ui-widget ui-state-default ui-corner-all', 'ui-state-hover');
 
             //cssClass property
             if (item.cssClass) {
@@ -1010,7 +1009,8 @@
         /* Shows error message dialog with given message.
         *************************************************************************/
         _showError: function (message) {
-            this._$errorDialogDiv.html(message).dialog('open');
+        	this._$errorDialogDiv.find(".modal-body").html(message);
+        	this._$errorDialogDiv.modal("show");
         },
 
         /* BUSY PANEL ***********************************************************/
@@ -1062,21 +1062,21 @@
 
         /* Adds jQueryUI class to an item.
         *************************************************************************/
-        _jqueryuiThemeAddClass: function ($elm, className, hoverClassName) {
-            if (!this.options.jqueryuiTheme) {
-                return;
-            }
+        //_jqueryuiThemeAddClass: function ($elm, className, hoverClassName) {
+        //    if (!this.options.jqueryuiTheme) {
+        //        return;
+        //    }
 
-            $elm.addClass(className);
+        //    $elm.addClass(className);
 
-            if (hoverClassName) {
-                $elm.hover(function () {
-                    $elm.addClass(hoverClassName);
-                }, function () {
-                    $elm.removeClass(hoverClassName);
-                });
-            }
-        },
+        //    if (hoverClassName) {
+        //        $elm.hover(function () {
+        //            $elm.addClass(hoverClassName);
+        //        }, function () {
+        //            $elm.removeClass(hoverClassName);
+        //        });
+        //    }
+        //},
 
         /* COMMON METHODS *******************************************************/
 
